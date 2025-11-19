@@ -1,0 +1,30 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Background with rounded corners -->
+  <rect width="400" height="400" rx="40" ry="40" fill="#1a1a2e"/>
+  
+  <!-- Pie chart centered at (200, 200) with radius 120 -->
+  
+  <!-- Slice 1: 40% - Blue -->
+  <path d="M 200,200 L 200,80 A 120,120 0 0,1 270.53,297.08 Z" 
+        fill="#00d9ff" 
+        stroke="#1a1a2e" 
+        stroke-width="2"/>
+  
+  <!-- Slice 2: 30% - Pink -->
+  <path d="M 200,200 L 270.53,297.08 A 120,120 0 0,1 85.87,237.08 Z" 
+        fill="#ff006e" 
+        stroke="#1a1a2e" 
+        stroke-width="2"/>
+  
+  <!-- Slice 3: 20% - Purple -->
+  <path d="M 200,200 L 85.87,237.08 A 120,120 0 0,1 129.47,102.92 Z" 
+        fill="#8338ec" 
+        stroke="#1a1a2e" 
+        stroke-width="2"/>
+  
+  <!-- Slice 4: 10% - Yellow -->
+  <path d="M 200,200 L 129.47,102.92 A 120,120 0 0,1 200,80 Z" 
+        fill="#ffbe0b" 
+        stroke="#1a1a2e" 
+        stroke-width="2"/>
+</svg>
