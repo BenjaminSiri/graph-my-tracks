@@ -5,7 +5,7 @@ import { observer } from "mobx-react"
 function App() {
   return (
     <div className="App">
-      <h1>bruh!</h1>
+      <h1>Hello World!</h1>
     </div>
   );
 }
