@@ -1,6 +1,7 @@
 import React from 'react';
 import { observer } from "mobx-react";
-import { Button } from 'material-mui';
+import styled from 'styled-components';
+import {Button} from '@mui/material';
 
 
 function App() {
