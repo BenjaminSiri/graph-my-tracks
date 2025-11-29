@@ -69,7 +69,7 @@ const Dashboard: React.FC = observer(() => {
       ) : (
         <p>Loading user information...</p>
       )}
-      <h1>Chart</h1>
+      <h1>Charts</h1>
       <button 
         onClick={handleLogout}
         style={{ 
