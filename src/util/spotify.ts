@@ -27,7 +27,6 @@ function base64encode(input: ArrayBuffer): string {
 }
 
 const Spotify = {
-  // Step 1: Redirect to Spotify authorization
   async redirectToAuthCodeFlow(): Promise<void> {
     const verifier = generateRandomString(64);
     const hashed = await sha256(verifier);
@@ -48,7 +47,6 @@ const Spotify = {
     window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
   },
 
-  // Step 2: Exchange code for access token (now saves to MobX)
   async getAccessToken(code: string): Promise<string> {
     spotifyAuthStore.setLoading(true);
     spotifyAuthStore.setError(null);
@@ -114,17 +112,14 @@ const Spotify = {
     }
   },
 
-  // Check if we have a valid token (now uses MobX)
   hasValidToken(): boolean {
     return spotifyAuthStore.hasValidToken;
   },
 
-  // Get the current access token (now from MobX)
   getCurrentToken(): string {
     return spotifyAuthStore.hasValidToken ? spotifyAuthStore.accessToken : '';
   },
 
-  // Step 3: Fetch user profile (now saves to MobX)
   async getUserInfo(): Promise<SpotifyUserInfo | null> {
     if (!spotifyAuthStore.hasValidToken) {
       return null;
@@ -154,7 +149,30 @@ const Spotify = {
     }
   },
 
-  // Logout helper
+  async getUserPlaylists(): Promise<any> {
+    if (!spotifyAuthStore.hasValidToken) {
+      return null;
+    }
+
+    try{
+      const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+        headers: { Authorization: `Bearer ${spotifyAuthStore.accessToken}` }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user playlists: ${response.status}`);
+      }
+      
+      const playlists = await response.json();
+      console.log('Fetched user playlists:', playlists);
+      return playlists;
+    } catch (error){
+      const errorMsg = error instanceof Error ? error.message : 'Failed to fetch user playlists';
+      spotifyAuthStore.setError(errorMsg);
+      throw error;
+    }
+  },
+
   logout(): void {
     spotifyAuthStore.clearToken();
   }

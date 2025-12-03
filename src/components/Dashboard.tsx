@@ -69,7 +69,21 @@ const Dashboard: React.FC = observer(() => {
       ) : (
         <p>Loading user information...</p>
       )}
-      <h1>Charts!</h1>
+      <h1>Charts</h1>
+      <button
+        onClick={Spotify.getUserPlaylists}
+        style={{
+          marginTop: '30px', 
+          padding: '10px 20px',
+          backgroundColor: '#1DB954',
+          color: 'white',
+          border: 'none',
+          borderRadius: '20px',
+          cursor: 'pointer'
+        }}
+      >
+        Get playlists
+      </button>
       <button 
         onClick={handleLogout}
         style={{ 
