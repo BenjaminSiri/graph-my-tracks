@@ -1,9 +1,9 @@
 // App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { RootStoreProvider } from './stores/RootStore';
-import Login from './components/Login';
-import Callback from './components/Callback';
-import Dashboard from './components/Dashboard';
+import Login from './pages/Login';
+import Callback from './pages/Callback';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
