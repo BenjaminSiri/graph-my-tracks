@@ -1,181 +1,190 @@
-// spotify.ts
-import secret from './secrets.json';
-import spotifyAuthStore from '../stores/SpotifyAuthStore';
-import { SpotifyTokenResponse, SpotifyUserInfo, SpotifyError } from '../types/spotify';
+import SpotifyAuthStore from '../stores/SpotifyAuthStore';
+import secrets from '../util/secrets.json';
 
-const clientId: string = secret.clientId;
-const redirectUri: string = 'http://127.0.0.1:3000/callback';
+const clientId = secrets.clientId;
+const redirectUri = 'http://127.0.0.1:3000/callback'; // Change for production
 
 // PKCE helper functions
 function generateRandomString(length: number): string {
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const values = crypto.getRandomValues(new Uint8Array(length));
-  return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
 
 async function sha256(plain: string): Promise<ArrayBuffer> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return window.crypto.subtle.digest('SHA-256', data);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    return window.crypto.subtle.digest('SHA-256', data);
 }
 
 function base64encode(input: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...Array.from(new Uint8Array(input))))
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+    return btoa(String.fromCharCode(...Array.from(new Uint8Array(input))))
+        .replace(/=/g, '')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
 }
 
 const Spotify = {
-  async redirectToAuthCodeFlow(): Promise<void> {
-    const verifier = generateRandomString(64);
-    const hashed = await sha256(verifier);
-    const challenge = base64encode(hashed);
+    // Step 1: Redirect to Spotify authorization
+    async redirectToAuthCodeFlow() {
+        const verifier = generateRandomString(64);
+        const hashed = await sha256(verifier);
+        const challenge = base64encode(hashed);
 
-    localStorage.setItem('verifier', verifier);
+        localStorage.setItem('verifier', verifier);
 
-    const params = new URLSearchParams({
-      client_id: clientId,
-      response_type: 'code',
-      redirect_uri: redirectUri,
-      scope: 'user-top-read',
-      code_challenge_method: 'S256',
-      code_challenge: challenge,
-    });
+        const params = new URLSearchParams({
+            client_id: clientId,
+            response_type: 'code',
+            redirect_uri: redirectUri,
+            scope: 'user-top-read',
+            code_challenge_method: 'S256',
+            code_challenge: challenge,
+        });
 
-    console.log('Redirecting to Spotify with redirect_uri:', redirectUri);
-    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-  },
+        console.log('Redirecting to Spotify with redirect_uri:', redirectUri);
+        window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    },
 
-  async getAccessToken(code: string): Promise<string> {
-    spotifyAuthStore.setLoading(true);
-    spotifyAuthStore.setError(null);
+    // Step 2: Exchange code for access token
+    async getAccessToken(code: string): Promise<string> {
+        const verifier = localStorage.getItem('verifier');
 
-    const verifier = localStorage.getItem('verifier');
+        if (!verifier) {
+            throw new Error('Verifier not found in localStorage');
+        }
 
-    if (!verifier) {
-      const errorMsg = 'Verifier not found in localStorage';
-      spotifyAuthStore.setError(errorMsg);
-      spotifyAuthStore.setLoading(false);
-      throw new Error(errorMsg);
-    }
+        const params = new URLSearchParams({
+            client_id: clientId,
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: redirectUri,
+            code_verifier: verifier,
+        });
 
-    const params = new URLSearchParams({
-      client_id: clientId,
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: redirectUri,
-      code_verifier: verifier,
-    });
+        console.log('Token exchange request:', {
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            code: code.substring(0, 10) + '...',
+            has_verifier: !!verifier
+        });
 
-    console.log('Token exchange request:', {
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      code: code.substring(0, 10) + '...',
-      has_verifier: !!verifier
-    });
+        try {
+            const result = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            });
 
-    try {
-      const result = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
-      });
+            const data = await result.json();
+            
+            console.log('Token exchange response status:', result.status);
+            console.log('Token exchange response:', data);
+            
+            if (data.access_token) {
+                // Store in MobX store
+                SpotifyAuthStore.setToken(data.access_token, data.expires_in);
+                localStorage.removeItem('verifier');
+                console.log('Successfully obtained access token');
+                return data.access_token;
+            } else {
+                const errorMsg = data.error_description || data.error || 'Failed to get access token';
+                console.error('Token exchange failed:', errorMsg, data);
+                SpotifyAuthStore.setError(errorMsg);
+                throw new Error(errorMsg);
+            }
+        } catch (error) {
+            console.error('Token exchange error:', error);
+            throw error;
+        }
+    },
 
-      const data: SpotifyTokenResponse | SpotifyError = await result.json();
-      
-      console.log('Token exchange response status:', result.status);
-      console.log('Token exchange response:', data);
-      
-      if ('access_token' in data) {
-        // Save to MobX store
-        spotifyAuthStore.setToken(data.access_token, data.expires_in);
-        localStorage.removeItem('verifier');
-        
-        console.log('Successfully obtained access token and saved to MobX');
-        spotifyAuthStore.setLoading(false);
-        
-        return data.access_token;
-      } else {
-        const errorMsg = data.error_description || data.error || 'Failed to get access token';
-        console.error('Token exchange failed:', errorMsg, data);
-        spotifyAuthStore.setError(errorMsg);
-        spotifyAuthStore.setLoading(false);
-        throw new Error(errorMsg);
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Token exchange error:', error);
-      spotifyAuthStore.setError(errorMsg);
-      spotifyAuthStore.setLoading(false);
-      throw error;
-    }
-  },
+    // Check if we have a valid token
+    hasValidToken(): boolean {
+        return SpotifyAuthStore.hasValidToken;
+    },
 
-  hasValidToken(): boolean {
-    return spotifyAuthStore.hasValidToken;
-  },
+    // Get the current access token
+    getCurrentToken(): string {
+        return SpotifyAuthStore.accessToken;
+    },
 
-  getCurrentToken(): string {
-    return spotifyAuthStore.hasValidToken ? spotifyAuthStore.accessToken : '';
-  },
+    // Fetch user profile
+    async getUserInfo() {
+        if (!this.hasValidToken()) {
+            return null;
+        }
 
-  async getUserInfo(): Promise<SpotifyUserInfo | null> {
-    if (!spotifyAuthStore.hasValidToken) {
-      return null;
-    }
+        SpotifyAuthStore.setLoading(true);
 
-    spotifyAuthStore.setLoading(true);
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me', {
+                headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+            });
 
-    try {
-      const response = await fetch('https://api.spotify.com/v1/me', {
-        headers: { Authorization: `Bearer ${spotifyAuthStore.accessToken}` }
-      });
+            if (!response.ok) {
+                throw new Error('Failed to fetch user info');
+            }
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user info: ${response.status}`);
-      }
+            const data = await response.json();
+            SpotifyAuthStore.setUserInfo(data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            SpotifyAuthStore.setError('Failed to fetch user info');
+            throw error;
+        } finally {
+            SpotifyAuthStore.setLoading(false);
+        }
+    },
 
-      const userInfo: SpotifyUserInfo = await response.json();
-      spotifyAuthStore.setUserInfo(userInfo);
-      spotifyAuthStore.setLoading(false);
-      
-      return userInfo;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to fetch user info';
-      spotifyAuthStore.setError(errorMsg);
-      spotifyAuthStore.setLoading(false);
-      throw error;
-    }
-  },
+    // Fetch top tracks or artists
+    async getTop(type: 'tracks' | 'artists', range: string) {
+        if (!this.hasValidToken()) {
+            return [];
+        }
 
-  async getUserPlaylists(): Promise<any> {
-    if (!spotifyAuthStore.hasValidToken) {
-      return null;
-    }
+        const response = await fetch(
+            `https://api.spotify.com/v1/me/top/${type}?time_range=${range}&limit=10`,
+            {
+                headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+            }
+        );
 
-    try{
-      const response = await fetch('https://api.spotify.com/v1/me/playlists', {
-        headers: { Authorization: `Bearer ${spotifyAuthStore.accessToken}` }
-      });
+        if (!response.ok) {
+            console.error('Failed to fetch top items');
+            return [];
+        }
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user playlists: ${response.status}`);
-      }
-      
-      const playlists = await response.json();
-      console.log('Fetched user playlists:', playlists);
-      return playlists;
-    } catch (error){
-      const errorMsg = error instanceof Error ? error.message : 'Failed to fetch user playlists';
-      spotifyAuthStore.setError(errorMsg);
-      throw error;
-    }
-  },
+        const jsonResponse = await response.json();
 
-  logout(): void {
-    spotifyAuthStore.clearToken();
-  }
+        if (!jsonResponse.items || jsonResponse.items.length === 0) {
+            console.log('No items found');
+            return [];
+        }
+
+        if (type === 'tracks') {
+            return jsonResponse.items.map((track: any) => ({
+                target: track.name,
+                trackVisible: false,
+                hint: track.artists[0].name,
+                hintVisible: false
+            }));
+        } else {
+            return jsonResponse.items.map((artist: any) => ({
+                target: artist.name,
+                trackVisible: false,
+                hint: '',
+                hintVisible: false
+            }));
+        }
+    },
+
+    // Logout
+    logout() {
+        SpotifyAuthStore.clearToken();
+        console.log('Logged out');
+    },
 };
 
 export default Spotify;
