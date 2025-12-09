@@ -24,6 +24,16 @@ export interface SpotifyTokenResponse {
       spotify: string;
     };
   }
+
+  export interface SpotifyPlaylist {
+    id: string;
+    name: string;
+    images: Array<{
+      url: string;
+      height: number;
+      width: number;
+    }>;
+  }
   
   export interface SpotifyError {
     error: string;

@@ -140,7 +140,7 @@ const Spotify = {
 
     // Fetch top tracks or artists
     async getTop(type: 'tracks' | 'artists', range: string) {
-        if (!this.hasValidToken()) {
+        if (!SpotifyAuthStore.hasValidToken) {
             return [];
         }
 
@@ -178,6 +178,45 @@ const Spotify = {
                 hintVisible: false
             }));
         }
+    },
+
+    // fetch user's playlists
+    async getUserPlaylists() {
+      if (!SpotifyAuthStore.hasValidToken) {
+        return [];
+      }
+
+      if (!SpotifyAuthStore.userInfo) {
+        console.error('User info not available');
+        return [];
+      }
+
+      const response = await fetch(
+        `https://api.spotify.com/v1/users/${SpotifyAuthStore.userInfo.id}/playlists?limit=10`,
+        {
+            headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+        }
+      );
+
+      if (!response.ok) {
+        console.error(`Failed to fetch user's playlists`);
+        return [];
+      }
+
+      const jsonResponse = await response.json();
+
+      if (!jsonResponse.items || jsonResponse.items.length === 0) {
+        console.log('No playlists found');
+        return [];
+      }
+
+      console.log('Fetched playlists:', jsonResponse.items);
+
+      return jsonResponse.items.map((playlist: any) => ({
+          name: playlist.name,
+          id: playlist.id,
+          tracksTotal: playlist.tracks.total,
+      }));
     },
 
     // Logout
