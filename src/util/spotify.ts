@@ -1,3 +1,4 @@
+import { SpotifyPlaylist } from '../types/spotify';
 import SpotifyAuthStore from '../stores/SpotifyAuthStore';
 import secrets from '../util/secrets.json';
 
@@ -209,14 +210,34 @@ const Spotify = {
         console.log('No playlists found');
         return [];
       }
-
-      console.log('Fetched playlists:', jsonResponse.items);
-
-      return jsonResponse.items.map((playlist: any) => ({
-          name: playlist.name,
-          id: playlist.id,
-          tracksTotal: playlist.tracks.total,
+      return jsonResponse.items.map((playlist: any): SpotifyPlaylist => ({
+        id: playlist.id,
+        name: playlist.name,
+        images: playlist.images || [],
+        tracksTotal: playlist.tracks?.total || 0,
+        tracks: [],
       }));
+    },
+
+    async getPlaylistTracks(playlistId: string): Promise<any[]> {
+      if (!SpotifyAuthStore.hasValidToken) {
+        return [];
+      }
+    
+      const response = await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+        {
+          headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+        }
+      );
+    
+      if (!response.ok) {
+        console.error('Failed to fetch playlist tracks');
+        return [];
+      }
+    
+      const jsonResponse = await response.json();
+      return jsonResponse.items || [];
     },
 
     // Logout

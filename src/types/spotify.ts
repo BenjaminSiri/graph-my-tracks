@@ -33,6 +33,8 @@ export interface SpotifyTokenResponse {
       height: number;
       width: number;
     }>;
+    tracksTotal?: number;
+    tracks?: any[];
   }
   
   export interface SpotifyError {

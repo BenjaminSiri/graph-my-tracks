@@ -1,46 +1,43 @@
 // components/Dashboard.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Spotify from '../util/spotify';
 import Sidebar from '../components/Sidebar';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/RootStore';
-import { SpotifyPlaylist } from '../types/spotify';
 
 const Dashboard: React.FC = observer(() => {
   const { spotifyAuthStore } = useStores();
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const hasFetchedPlaylists = useRef(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      // Wait for user info to be available
-      if (!spotifyAuthStore.userInfo) {
-        console.log('Waiting for user info...');
-        await Spotify.getUserInfo();
-      }
+    // Prevent multiple fetches
+    if (hasFetchedPlaylists.current || !spotifyAuthStore.userInfo) {
+      return;
+    }
 
-      // Now fetch playlists
-      if (spotifyAuthStore.userInfo) {
-        setIsLoading(true);
-        try {
-          const userPlaylists = await Spotify.getUserPlaylists();
-          setPlaylists(userPlaylists);
-        } catch (error) {
-          console.error('Failed to fetch playlists:', error);
-        } finally {
-          setIsLoading(false);
-        }
+    const fetchPlaylists = async () => {
+      hasFetchedPlaylists.current = true;
+      setIsLoading(true);
+      try {
+        const userPlaylists = await Spotify.getUserPlaylists();
+        spotifyAuthStore.setPlaylists(userPlaylists);
+        console.log('Playlists fetched:', userPlaylists);
+      } catch (error) {
+        console.error('Failed to fetch playlists:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchData();
-  }, [spotifyAuthStore.userInfo]);
+    fetchPlaylists();
+  }, [spotifyAuthStore.userInfo, spotifyAuthStore]);
 
-  const handleFetchPlaylists = async () => {
+  const handleRefreshPlaylists = async () => {
     setIsLoading(true);
     try {
       const userPlaylists = await Spotify.getUserPlaylists();
-      setPlaylists(userPlaylists);
+      spotifyAuthStore.setPlaylists(userPlaylists);
     } catch (error) {
       console.error('Failed to fetch playlists:', error);
     } finally {
@@ -49,16 +46,38 @@ const Dashboard: React.FC = observer(() => {
   };
 
   if (!spotifyAuthStore.userInfo) {
-    return <div>Loading user data...</div>;
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p>Loading user data...</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <button onClick={handleFetchPlaylists} disabled={isLoading}>
-        {isLoading ? 'Loading...' : 'Refresh Playlists'}
-      </button>
-      {isLoading && <p>Loading playlists...</p>}
-      <Sidebar playlists={playlists} />
+    <div style={{ padding: '2rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <button 
+          onClick={handleRefreshPlaylists} 
+          disabled={isLoading}
+          style={{
+            padding: '0.5rem 1rem',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            opacity: isLoading ? 0.6 : 1
+          }}
+        >
+          {isLoading ? 'Loading...' : 'Refresh Playlists'}
+        </button>
+      </div>
+      
+      {isLoading ?
+        <p>Loading playlists...</p>
+        :
+        <Sidebar playlists={spotifyAuthStore.playlists} />
+      }
+      
+      {!isLoading && spotifyAuthStore.playlists.length === 0 && (
+        <p>No playlists found.</p>
+      )}
     </div>
   );
 });

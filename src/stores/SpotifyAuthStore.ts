@@ -1,11 +1,12 @@
 // stores/SpotifyAuthStore.ts
 import { makeAutoObservable } from 'mobx';
-import { SpotifyUserInfo } from '../types/spotify';
+import { SpotifyUserInfo, SpotifyPlaylist } from '../types/spotify';
 
 class SpotifyAuthStore {
   accessToken: string = '';
   tokenExpirationTime: number = 0;
   userInfo: SpotifyUserInfo | null = null;
+  playlists: SpotifyPlaylist[] = [];
   isLoading: boolean = false;
   error: string | null = null;
 
@@ -59,6 +60,11 @@ class SpotifyAuthStore {
     this.userInfo = userInfo;
   }
 
+  // Set playlists
+  setPlaylists(playlists: SpotifyPlaylist[]): void {
+    this.playlists = playlists;
+  }
+
   // Set loading state
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
@@ -74,6 +80,7 @@ class SpotifyAuthStore {
     this.accessToken = '';
     this.tokenExpirationTime = 0;
     this.userInfo = null;
+    this.playlists = [];
     this.error = null;
     
     localStorage.removeItem('spotify_access_token');
