@@ -91,8 +91,6 @@ const Sidebar: React.FC<SidebarProps> = observer((props) => {
                                 </PlaceholderImage>
                             )}
                             <PlaylistName>{playlist.name}</PlaylistName>
-                            <PlaylistName>{playlist.tracksTotal}</PlaylistName>
-
                         </StyledCardContent>
                     </CardActionArea>
                 </StyledCard>
