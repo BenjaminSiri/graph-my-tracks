@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
+import { useStores } from '../stores/RootStore';
 
 const StyledDiv = styled.div`
     border: 1px solid #ccc;
@@ -8,13 +10,15 @@ const StyledDiv = styled.div`
 `;
 
 
-const Graph: React.FC = () => {
+const Graph: React.FC = observer(() => {
+    const { spotifyAuthStore } = useStores();
+
 
     return (
         <StyledDiv>
-            Graph Component
+            <p>{spotifyAuthStore.selectedPlaylist ? spotifyAuthStore.selectedPlaylist.name : 'Select a playlist'}</p>
         </StyledDiv>
     );
-};
+});
 
 export default Graph;

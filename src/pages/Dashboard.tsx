@@ -20,10 +20,10 @@ const DashboardDiv = styled.div`
 
 `;
 
-const StyledButton = styled.button<{ isLoading: boolean }>`
+const StyledButton = styled.button<{ $isLoading: boolean }>`
   padding: 0.5rem 1rem;
-  cursor: ${props => props.isLoading ? 'not-allowed' : 'pointer'};
-  opacity: ${props => props.isLoading ? 0.6 : 1};
+  cursor: ${props => props.$isLoading ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.$isLoading ? 0.6 : 1};
   width: 100%;
   margin-bottom: 10px;
 `;
@@ -32,7 +32,7 @@ const StyledButton = styled.button<{ isLoading: boolean }>`
 
 const Dashboard: React.FC = observer(() => {
   const { spotifyAuthStore } = useStores();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const hasFetchedPlaylists = useRef(false);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const Dashboard: React.FC = observer(() => {
         <StyledButton 
           onClick={handleRefreshPlaylists} 
           disabled={isLoading}
-          isLoading={isLoading} 
+          $isLoading={isLoading} 
         >
           {isLoading ? 'Loading...' : 'Refresh Playlists'}
         </StyledButton >

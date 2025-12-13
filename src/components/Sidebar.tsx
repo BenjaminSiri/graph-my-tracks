@@ -1,7 +1,8 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import { useStores } from '../stores/RootStore';
 import Spotify from '../util/spotify';
-import { Stack, Card, CardContent } from '@mui/material';
+import { Stack, Card, CardContent, CardActionArea } from '@mui/material';
 import { SpotifyPlaylist } from '../types/spotify';
 import styled from 'styled-components';
 
@@ -68,26 +69,33 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = observer((props) => {
+    const { spotifyAuthStore } = useStores();
     
+    const handlePlaylistClick = (playlistId: string) => {
+        spotifyAuthStore.setSelectedPlaylist(playlistId);
+    }
+
     return(
         <StyledStack>
             {props.playlists.map((playlist) => (
                 <StyledCard key={playlist.id}>
-                    <StyledCardContent>
-                        {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
-                            <PlaylistImage 
-                                src={playlist.images[0].url} 
-                                alt={playlist.name}
-                            />
-                        ) : (
-                            <PlaceholderImage>
-                                {playlist.name.charAt(0).toUpperCase()}
-                            </PlaceholderImage>
-                        )}
-                        <PlaylistName>{playlist.name}</PlaylistName>
-                        <PlaylistName>{playlist.tracksTotal}</PlaylistName>
+                    <CardActionArea onClick={() => handlePlaylistClick(playlist.id)}>
+                        <StyledCardContent>
+                            {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
+                                <PlaylistImage 
+                                    src={playlist.images[0].url} 
+                                    alt={playlist.name}
+                                />
+                            ) : (
+                                <PlaceholderImage>
+                                    {playlist.name.charAt(0).toUpperCase()}
+                                </PlaceholderImage>
+                            )}
+                            <PlaylistName>{playlist.name}</PlaylistName>
+                            <PlaylistName>{playlist.tracksTotal}</PlaylistName>
 
-                    </StyledCardContent>
+                        </StyledCardContent>
+                    </CardActionArea>
                 </StyledCard>
             ))}
         </StyledStack>

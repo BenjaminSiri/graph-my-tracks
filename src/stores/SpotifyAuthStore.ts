@@ -8,6 +8,7 @@ class SpotifyAuthStore {
   userInfo: SpotifyUserInfo | null = null;
   playlists: SpotifyPlaylist[] = [];
   isLoading: boolean = false;
+  selectedPlaylistId: string | null = null;
   error: string | null = null;
 
   constructor() {
@@ -68,6 +69,17 @@ class SpotifyAuthStore {
   // Set loading state
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
+  }
+
+  // Set selected playlist
+  setSelectedPlaylist(playlistId: string | null): void {
+    this.selectedPlaylistId = playlistId;
+  }
+
+  // Get selected playlist
+  get selectedPlaylist(): SpotifyPlaylist | null {
+    if (!this.selectedPlaylistId) return null;
+    return this.playlists.find(p => p.id === this.selectedPlaylistId) || null;
   }
 
   // Set error
