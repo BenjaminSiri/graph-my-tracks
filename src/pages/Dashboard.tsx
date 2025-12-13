@@ -13,7 +13,6 @@ const DashboardDiv = styled.div`
   flex-direction: row;
   height: calc(100vh - 60px);
   width: 100vw;
-  background-color: #f0f2f5;
   padding: 1rem;
   box-sizing: border-box;
   gap: 1rem;

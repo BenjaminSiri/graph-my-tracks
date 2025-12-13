@@ -25,6 +25,7 @@ const StyledCardContent = styled(CardContent)`
     flex-direction: row;
     align-items: center;
     gap: 12px;
+    background-color: var(--spotify-green);
 `;
 
 const PlaylistImage = styled.img`
@@ -37,11 +38,12 @@ const PlaylistImage = styled.img`
 
 const PlaylistName = styled.h3`
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--background);
 `;
 
 const StyledStack = styled(Stack)`

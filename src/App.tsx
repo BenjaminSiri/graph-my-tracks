@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Callback from './pages/Callback';
 import Dashboard from './pages/Dashboard';
 import Navbar from './components/Navbar';
+import GlobalStyle from './styles/GlobalStyle';
 
 function App() {
   const location = useLocation();
@@ -12,6 +13,7 @@ function App() {
 
   return (
     <RootStoreProvider>
+      <GlobalStyle />
       {showNavbar && <Navbar />}
       <Routes>
         <Route path="/login" element={<Login />} />
