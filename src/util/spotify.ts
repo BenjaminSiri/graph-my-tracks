@@ -1,9 +1,8 @@
 import { SpotifyPlaylist } from '../types/spotify';
 import SpotifyAuthStore from '../stores/SpotifyAuthStore';
-import secrets from '../util/secrets.json';
 
-const clientId = secrets.clientId;
-const redirectUri = 'http://127.0.0.1:3000/callback'; // Change for production
+const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID || '';
+const redirectUri = process.env.REACT_APP_REDIRECT_URI || 'http://127.0.0.1:3000/callback';
 
 // PKCE helper functions
 function generateRandomString(length: number): string {
