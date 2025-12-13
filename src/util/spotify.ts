@@ -161,48 +161,6 @@ async getAccessToken(code: string): Promise<string> {
         }
     },
 
-    // Fetch top tracks or artists
-    async getTop(type: 'tracks' | 'artists', range: string) {
-        if (!SpotifyAuthStore.hasValidToken) {
-            return [];
-        }
-
-        const response = await fetch(
-            `https://api.spotify.com/v1/me/top/${type}?time_range=${range}&limit=10`,
-            {
-                headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
-            }
-        );
-
-        if (!response.ok) {
-            console.error('Failed to fetch top items');
-            return [];
-        }
-
-        const jsonResponse = await response.json();
-
-        if (!jsonResponse.items || jsonResponse.items.length === 0) {
-            console.log('No items found');
-            return [];
-        }
-
-        if (type === 'tracks') {
-            return jsonResponse.items.map((track: any) => ({
-                target: track.name,
-                trackVisible: false,
-                hint: track.artists[0].name,
-                hintVisible: false
-            }));
-        } else {
-            return jsonResponse.items.map((artist: any) => ({
-                target: artist.name,
-                trackVisible: false,
-                hint: '',
-                hintVisible: false
-            }));
-        }
-    },
-
     // fetch user's playlists
     async getUserPlaylists() {
       if (!SpotifyAuthStore.hasValidToken) {
@@ -247,7 +205,7 @@ async getAccessToken(code: string): Promise<string> {
       }
     
       const response = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+        `https://api.spotify.com/v1/playlists/${playlistId}`,
         {
           headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
         }
@@ -259,7 +217,7 @@ async getAccessToken(code: string): Promise<string> {
       }
     
       const jsonResponse = await response.json();
-      return jsonResponse.items || [];
+      return jsonResponse.tracks.items || [];
     },
 
     // Logout

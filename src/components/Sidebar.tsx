@@ -1,7 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/RootStore';
-import Spotify from '../util/spotify';
 import { Stack, Card, CardContent, CardActionArea } from '@mui/material';
 import { SpotifyPlaylist } from '../types/spotify';
 import styled from 'styled-components';

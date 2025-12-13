@@ -47,7 +47,6 @@ const Dashboard: React.FC = observer(() => {
       try {
         const userPlaylists = await Spotify.getUserPlaylists();
         spotifyAuthStore.setPlaylists(userPlaylists);
-        console.log('Playlists fetched:', userPlaylists);
       } catch (error) {
         console.error('Failed to fetch playlists:', error);
       } finally {
