@@ -12,6 +12,7 @@ const StyledNavbar = styled.div`
     border-bottom: 2px solid #1DB954;
     justify-content: space-between;
     align-items: center;
+    height: 60px;
 `;
 
 const ProfileButton = styled.button`

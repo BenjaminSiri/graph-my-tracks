@@ -1,9 +1,34 @@
 // components/Dashboard.tsx
 import React, { useEffect, useState, useRef } from 'react';
-import Spotify from '../util/spotify';
-import Sidebar from '../components/Sidebar';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/RootStore';
+import Spotify from '../util/spotify';
+import styled from 'styled-components';
+
+import Graph from '../components/Graph';
+import Sidebar from '../components/Sidebar';
+
+const DashboardDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 60px);
+  width: 100vw;
+  background-color: #f0f2f5;
+  padding: 1rem;
+  box-sizing: border-box;
+  gap: 1rem;
+
+`;
+
+const StyledButton = styled.button<{ isLoading: boolean }>`
+  padding: 0.5rem 1rem;
+  cursor: ${props => props.isLoading ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.isLoading ? 0.6 : 1};
+  width: 100%;
+  margin-bottom: 10px;
+`;
+
+
 
 const Dashboard: React.FC = observer(() => {
   const { spotifyAuthStore } = useStores();
@@ -54,31 +79,24 @@ const Dashboard: React.FC = observer(() => {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <button 
+    <DashboardDiv>
+      <div>
+        <StyledButton 
           onClick={handleRefreshPlaylists} 
           disabled={isLoading}
-          style={{
-            padding: '0.5rem 1rem',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            opacity: isLoading ? 0.6 : 1
-          }}
+          isLoading={isLoading} 
         >
           {isLoading ? 'Loading...' : 'Refresh Playlists'}
-        </button>
+        </StyledButton >
+      
+        {isLoading ?
+          <p>Loading playlists...</p>
+          :
+          <Sidebar playlists={spotifyAuthStore.playlists} />
+        }
       </div>
-      
-      {isLoading ?
-        <p>Loading playlists...</p>
-        :
-        <Sidebar playlists={spotifyAuthStore.playlists} />
-      }
-      
-      {!isLoading && spotifyAuthStore.playlists.length === 0 && (
-        <p>No playlists found.</p>
-      )}
-    </div>
+      <Graph />
+    </DashboardDiv>
   );
 });
 
