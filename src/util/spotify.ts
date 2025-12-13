@@ -26,79 +26,101 @@ function base64encode(input: ArrayBuffer): string {
 }
 
 const Spotify = {
-    // Step 1: Redirect to Spotify authorization
-    async redirectToAuthCodeFlow() {
-        const verifier = generateRandomString(64);
-        const hashed = await sha256(verifier);
-        const challenge = base64encode(hashed);
+// Step 1: Redirect to Spotify authorization
+async redirectToAuthCodeFlow() {
+  const verifier = generateRandomString(64);
+  const hashed = await sha256(verifier);
+  const challenge = base64encode(hashed);
 
-        localStorage.setItem('verifier', verifier);
+  // Use sessionStorage instead of localStorage
+  sessionStorage.setItem('verifier', verifier);
+  // Also save to localStorage as backup
+  localStorage.setItem('verifier', verifier);
 
-        const params = new URLSearchParams({
-            client_id: clientId,
-            response_type: 'code',
-            redirect_uri: redirectUri,
-            scope: 'user-top-read',
-            code_challenge_method: 'S256',
-            code_challenge: challenge,
-        });
+  const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      scope: 'user-top-read',
+      code_challenge_method: 'S256',
+      code_challenge: challenge,
+  });
 
-        console.log('Redirecting to Spotify with redirect_uri:', redirectUri);
-        window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    },
+  console.log('Redirecting to Spotify with redirect_uri:', redirectUri);
+  console.log('Saved verifier:', verifier.substring(0, 10) + '...');
+  
+  window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+},
 
-    // Step 2: Exchange code for access token
-    async getAccessToken(code: string): Promise<string> {
-        const verifier = localStorage.getItem('verifier');
+// Step 2: Exchange code for access token
+async getAccessToken(code: string): Promise<string> {
+  // Try sessionStorage first, then localStorage
+  let verifier = sessionStorage.getItem('verifier') || localStorage.getItem('verifier');
+  
+  // Retry a few times if verifier isn't found
+  let retries = 0;
+  while (!verifier && retries < 5) {
+      console.log(`Verifier not found, retry ${retries + 1}/5...`);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      verifier = sessionStorage.getItem('verifier') || localStorage.getItem('verifier');
+      retries++;
+  }
 
-        if (!verifier) {
-            throw new Error('Verifier not found in localStorage');
-        }
+  if (!verifier) {
+      console.error('Verifier still not found after retries');
+      console.log('localStorage keys:', Object.keys(localStorage));
+      console.log('sessionStorage keys:', Object.keys(sessionStorage));
+      throw new Error('Verifier not found in storage');
+  }
 
-        const params = new URLSearchParams({
-            client_id: clientId,
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: redirectUri,
-            code_verifier: verifier,
-        });
+  console.log('Found verifier:', verifier.substring(0, 10) + '...');
 
-        console.log('Token exchange request:', {
-            client_id: clientId,
-            redirect_uri: redirectUri,
-            code: code.substring(0, 10) + '...',
-            has_verifier: !!verifier
-        });
+  const params = new URLSearchParams({
+      client_id: clientId,
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri,
+      code_verifier: verifier,
+  });
 
-        try {
-            const result = await fetch('https://accounts.spotify.com/api/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            });
+  console.log('Token exchange request:', {
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      code: code.substring(0, 10) + '...',
+      has_verifier: !!verifier
+  });
 
-            const data = await result.json();
-            
-            console.log('Token exchange response status:', result.status);
-            console.log('Token exchange response:', data);
-            
-            if (data.access_token) {
-                // Store in MobX store
-                SpotifyAuthStore.setToken(data.access_token, data.expires_in);
-                localStorage.removeItem('verifier');
-                console.log('Successfully obtained access token');
-                return data.access_token;
-            } else {
-                const errorMsg = data.error_description || data.error || 'Failed to get access token';
-                console.error('Token exchange failed:', errorMsg, data);
-                SpotifyAuthStore.setError(errorMsg);
-                throw new Error(errorMsg);
-            }
-        } catch (error) {
-            console.error('Token exchange error:', error);
-            throw error;
-        }
-    },
+  try {
+      const result = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+      });
+
+      const data = await result.json();
+      
+      console.log('Token exchange response status:', result.status);
+      console.log('Token exchange response:', data);
+      
+      if (data.access_token) {
+          // Store in MobX store
+          SpotifyAuthStore.setToken(data.access_token, data.expires_in);
+          // Clean up both storages
+          localStorage.removeItem('verifier');
+          sessionStorage.removeItem('verifier');
+          console.log('Successfully obtained access token');
+          return data.access_token;
+      } else {
+          const errorMsg = data.error_description || data.error || 'Failed to get access token';
+          console.error('Token exchange failed:', errorMsg, data);
+          SpotifyAuthStore.setError(errorMsg);
+          throw new Error(errorMsg);
+      }
+  } catch (error) {
+      console.error('Token exchange error:', error);
+      throw error;
+  }
+},
 
     // Check if we have a valid token
     hasValidToken(): boolean {
@@ -242,8 +264,10 @@ const Spotify = {
 
     // Logout
     logout() {
-        SpotifyAuthStore.clearToken();
-        console.log('Logged out');
+      SpotifyAuthStore.clearToken();
+      localStorage.removeItem('verifier');
+      sessionStorage.removeItem('verifier');
+      console.log('Logged out');
     },
 };
 
