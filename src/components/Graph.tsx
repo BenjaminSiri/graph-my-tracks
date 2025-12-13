@@ -30,7 +30,7 @@ ChartJS.register(
 const StyledDiv = styled.div`
     border: 1px solid #ccc;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
     padding: 20px;
 `;
 
@@ -98,7 +98,7 @@ const Graph: React.FC = observer(() => {
             <p>{spotifyAuthStore.selectedPlaylist ? spotifyAuthStore.selectedPlaylist.name : 'Select a playlist'}</p>
             
             {tracks.length > 0 && (
-                <div style={{ height: '400px', marginBottom: '20px' }}>
+                <div style={{ width: '100%', marginBottom: '20px' }}>
                     <Line data={chartData} options={chartOptions} />
                 </div>
             )}
