@@ -48,7 +48,6 @@ const Navbar: React.FC = observer(() => {
 
         // Fetch user info if we don't have it yet
         if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isLoading) {
-            console.log('Fetching user info...');
             Spotify.getUserInfo().catch((error) => {
                 console.error('Failed to fetch user info:', error);
             });
