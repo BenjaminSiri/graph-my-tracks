@@ -61,7 +61,7 @@ const Navbar: React.FC = observer(() => {
 
     return (
         <StyledNavbar>
-            <h2>Chart my Tracks</h2>
+            <h2>Graph my Tracks</h2>
             {spotifyAuthStore.userInfo ? (
                 <ProfileButton onClick={handleLogout}>
                     {spotifyAuthStore.userInfo.images && spotifyAuthStore.userInfo.images.length > 0 && (
