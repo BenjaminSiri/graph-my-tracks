@@ -3,6 +3,7 @@ import SpotifyAuthStore from '../stores/SpotifyAuthStore';
 
 const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID || '';
 const redirectUri = process.env.REACT_APP_REDIRECT_URI || 'http://127.0.0.1:3000/callback';
+const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET || '';
 
 // PKCE helper functions
 function generateRandomString(length: number): string {
@@ -51,6 +52,23 @@ async redirectToAuthCodeFlow() {
   window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 },
 
+async getGuestAccessToken(): Promise<string> {
+
+
+const response = await fetch('https://accounts.spotify.com/api/token', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+  },
+  body: 'grant_type=client_credentials'
+});
+
+const data = await response.json();
+SpotifyAuthStore.setToken(data.access_token, data.expires_in);
+return data;
+},
+
 // Step 2: Exchange code for access token
 async getAccessToken(code: string): Promise<string> {
   // Try sessionStorage first, then localStorage
@@ -71,8 +89,6 @@ async getAccessToken(code: string): Promise<string> {
       console.log('sessionStorage keys:', Object.keys(sessionStorage));
       throw new Error('Verifier not found in storage');
   }
-
-  console.log('Found verifier:', verifier.substring(0, 10) + '...');
 
   const params = new URLSearchParams({
       client_id: clientId,
@@ -97,9 +113,6 @@ async getAccessToken(code: string): Promise<string> {
       });
 
       const data = await result.json();
-      
-      console.log('Token exchange response status:', result.status);
-      console.log('Token exchange response:', data);
       
       if (data.access_token) {
           // Store in MobX store
@@ -172,7 +185,7 @@ async getAccessToken(code: string): Promise<string> {
       }
 
       const response = await fetch(
-        `https://api.spotify.com/v1/users/${SpotifyAuthStore.userInfo.id}/playlists?limit=10`,
+        `https://api.spotify.com/v1/users/${SpotifyAuthStore.userInfo.id}/playlists?limit=20`,
         {
             headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
         }

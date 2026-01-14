@@ -56,19 +56,6 @@ const Dashboard: React.FC = observer(() => {
     fetchPlaylists();
   }, [spotifyAuthStore.userInfo, spotifyAuthStore]);
 
-  const handleRefreshPlaylists = async () => {
-    setIsLoading(true);
-    try {
-      const userPlaylists = await Spotify.getUserPlaylists();
-      spotifyAuthStore.setPlaylists(userPlaylists);
-      spotifyAuthStore.setSelectedPlaylist(null);
-    } catch (error) {
-      console.error('Failed to fetch playlists:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (!spotifyAuthStore.userInfo) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -80,13 +67,6 @@ const Dashboard: React.FC = observer(() => {
   return (
     <DashboardDiv>
       <div>
-        <StyledButton 
-          onClick={handleRefreshPlaylists} 
-          disabled={isLoading}
-          $isLoading={isLoading} 
-        >
-          {isLoading ? 'Loading...' : 'Refresh Playlists'}
-        </StyledButton >
       
         {isLoading ?
           <p>Loading playlists...</p>

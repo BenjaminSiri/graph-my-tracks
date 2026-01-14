@@ -21,8 +21,13 @@ const Login: React.FC = observer(() => {
     }
   };
 
-  const handleGuestLogin = () => {
-
+  const handleGuestLogin = async () => {
+    try{
+      await Spotify.getGuestAccessToken();
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Failed to get guest access token:', error);
+    }
   };
 
   return (
@@ -32,7 +37,7 @@ const Login: React.FC = observer(() => {
         <button onClick={handleLogin}>
           Connect with Spotify
         </button>
-        <button onClick={handleGuestLogin}>
+        <button onClick={handleGuestLogin} disabled={true}>
           Continue as Guest
         </button>
       </ButtonsDiv>

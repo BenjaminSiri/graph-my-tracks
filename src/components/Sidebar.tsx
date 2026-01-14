@@ -7,6 +7,8 @@ import styled from 'styled-components';
 
 const StyledCard = styled(Card)`
     height: 60px;
+    min-height: 60px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     margin-bottom: 10px;
@@ -50,6 +52,9 @@ const StyledStack = styled(Stack)`
     width: 100%;
     min-width: 200px;
     max-width: 300px;
+    height: 100%;
+    max-height: 100vh;  
+    overflow-y: auto;
 `;
 
 const PlaceholderImage = styled.div`
