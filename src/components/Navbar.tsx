@@ -13,6 +13,7 @@ const StyledNavbar = styled.div`
     justify-content: space-between;
     align-items: center;
     height: 60px;
+    padding: 0 20px;
 `;
 
 const ProfileButton = styled.button`
@@ -64,10 +65,15 @@ const Navbar: React.FC = observer(() => {
             <h2>Graph my Tracks</h2>
             {spotifyAuthStore.userInfo ? (
                 <ProfileButton onClick={handleLogout}>
-                    {spotifyAuthStore.userInfo.images && spotifyAuthStore.userInfo.images.length > 0 && (
+                    {(spotifyAuthStore.userInfo.images && spotifyAuthStore.userInfo.images.length > 0) ? (
                         <ProfileImage 
                             src={spotifyAuthStore.userInfo.images[0].url} 
                             alt="Profile" 
+                        />
+                    ) : (
+                        <ProfileImage 
+                            src="https://via.placeholder.com/50" 
+                            alt="Profile Placeholder" 
                         />
                     )}
                 </ProfileButton>
