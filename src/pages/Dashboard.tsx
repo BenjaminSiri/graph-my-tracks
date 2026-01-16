@@ -19,6 +19,14 @@ const DashboardDiv = styled.div`
 
 `;
 
+const MainViewDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+`;
+
 const StyledButton = styled.button<{ $isLoading: boolean }>`
   padding: 0.5rem 1rem;
   cursor: ${props => props.$isLoading ? 'not-allowed' : 'pointer'};
@@ -74,7 +82,10 @@ const Dashboard: React.FC = observer(() => {
           <Sidebar playlists={spotifyAuthStore.playlists} />
         }
       </div>
-      <Graph />
+      <MainViewDiv>
+        <p>Controls and downloads</p>
+        <Graph />
+      </MainViewDiv>
     </DashboardDiv>
   );
 });
