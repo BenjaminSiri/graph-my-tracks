@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -34,6 +34,7 @@ const Navbar: React.FC = observer(() => {
     const navigate = useNavigate();
     const location = useLocation();
     const { spotifyAuthStore } = useStores();
+    const hasAttemptedFetch = useRef(false);
 
     useEffect(() => {
         // Don't redirect if we're on callback or login page
@@ -47,13 +48,36 @@ const Navbar: React.FC = observer(() => {
             return;
         }
 
-        // Fetch user info if we don't have it yet
-        if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isLoading) {
+        // Only fetch user info for authenticated users (not guests)
+        if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isLoading && !spotifyAuthStore.isGuest && !hasAttemptedFetch.current) {
+            hasAttemptedFetch.current = true; // Mark as attempted
             Spotify.getUserInfo().catch((error) => {
                 console.error('Failed to fetch user info:', error);
+                // If getUserInfo fails, might be a guest token - set guest mode
+                spotifyAuthStore.setGuestMode(true);
+                spotifyAuthStore.setUserInfo({
+                    display_name: 'Guest User',
+                    id: 'guest',
+                    email: '',
+                    country: '',
+                    images: [],
+                    followers: { total: 0 },
+                    external_urls: { spotify: '' }
+                });
+            });
+        } else if (spotifyAuthStore.isGuest && !spotifyAuthStore.userInfo) {
+            // Set default guest user info
+            spotifyAuthStore.setUserInfo({
+                display_name: 'Guest User',
+                id: 'guest',
+                email: '',
+                country: '',
+                images: [],
+                followers: { total: 0 },
+                external_urls: { spotify: '' }
             });
         }
-    }, [spotifyAuthStore.hasValidToken, spotifyAuthStore.userInfo, spotifyAuthStore.isLoading, navigate, location.pathname]);
+    }, [spotifyAuthStore.hasValidToken, spotifyAuthStore.userInfo, spotifyAuthStore.isLoading, spotifyAuthStore.isGuest, navigate, location.pathname]);
 
     const handleLogout = () => {
         Spotify.logout();
@@ -71,14 +95,11 @@ const Navbar: React.FC = observer(() => {
                             alt="Profile" 
                         />
                     ) : (
-                        <ProfileImage 
-                            src="https://via.placeholder.com/50" 
-                            alt="Profile Placeholder" 
-                        />
+                        <p  style={{ color: '#1DB954' }}>No Profile Image</p>
                     )}
                 </ProfileButton>
             ) : (
-                <p>Loading user...</p>
+                <p style={{ color: '#1DB954' }}>Loading user...</p>
             )}
         </StyledNavbar>
     );

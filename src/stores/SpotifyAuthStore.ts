@@ -10,6 +10,7 @@ class SpotifyAuthStore {
   isLoading: boolean = false;
   selectedPlaylistId: string | null = null;
   error: string | null = null;
+  isGuest: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -27,6 +28,10 @@ class SpotifyAuthStore {
     
     this.error = null;
   }
+
+  setGuestMode(isGuest: boolean) {
+        this.isGuest = isGuest;
+    }
 
   // Load token from localStorage on app initialization
   loadTokenFromStorage(): void {
