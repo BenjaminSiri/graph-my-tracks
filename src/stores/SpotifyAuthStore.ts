@@ -7,6 +7,7 @@ class SpotifyAuthStore {
   tokenExpirationTime: number = 0;
   userInfo: SpotifyUserInfo | null = null;
   playlists: SpotifyPlaylist[] = [];
+  albums: any[] = [];
   isLoading: boolean = false;
   selectedPlaylistId: string | null = null;
   error: string | null = null;
@@ -92,6 +93,10 @@ class SpotifyAuthStore {
   // Set selected playlist
   setSelectedPlaylist(playlistId: string | null): void {
     this.selectedPlaylistId = playlistId;
+  }
+
+  setAlbums(albums: any[]): void {
+    this.albums = albums;
   }
 
   // Get selected playlist

@@ -15,7 +15,7 @@ const ButtonsDiv = styled.div`
 
 const Login: React.FC = observer(() => {
   const { spotifyAuthStore } = useStores();
-  
+
   const handleLogin = async () => {
     try {
       await Spotify.redirectToAuthCodeFlow();
@@ -39,7 +39,7 @@ const handleGuestLogin = async () => {
       <h1>Login to Spotify</h1>
       <ButtonsDiv>
         <button onClick={handleLogin}>
-          Connect with Spotify
+          Dev Login with Spotify
         </button>
         <button onClick={handleGuestLogin}>
           Continue as Guest

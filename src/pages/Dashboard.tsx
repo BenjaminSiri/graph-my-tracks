@@ -48,20 +48,35 @@ const Dashboard: React.FC = observer(() => {
       return;
     }
 
-    const fetchPlaylists = async () => {
-      hasFetchedPlaylists.current = true;
-      setIsLoading(true);
-      try {
-        const userPlaylists = await Spotify.getUserPlaylists();
-        spotifyAuthStore.setPlaylists(userPlaylists);
-      } catch (error) {
-        console.error('Failed to fetch playlists:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if(!spotifyAuthStore.isGuest) {
+      const fetchPlaylists = async () => {
+        hasFetchedPlaylists.current = true;
+        setIsLoading(true);
+        try {
+          const userPlaylists = await Spotify.getUserPlaylists();
+          spotifyAuthStore.setPlaylists(userPlaylists);
+        } catch (error) {
+          console.error('Failed to fetch playlists:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchPlaylists();
+      fetchPlaylists();
+    } else {
+      const fetchAlbums = async () => {
+        setIsLoading(true);
+        try {
+          const albums = await Spotify.getAlbums();
+          spotifyAuthStore.setAlbums(albums);
+        } catch (error) {
+          console.error('Failed to fetch albums:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAlbums();
+    }
   }, [spotifyAuthStore.userInfo, spotifyAuthStore]);
 
   if (!spotifyAuthStore.userInfo) {
@@ -75,12 +90,17 @@ const Dashboard: React.FC = observer(() => {
   return (
     <DashboardDiv>
       <div>
-      
-        {isLoading ?
+        {isLoading ? (
           <p>Loading playlists...</p>
-          :
-          <Sidebar playlists={spotifyAuthStore.playlists} />
-        }
+        ) : (
+          <>
+          {!spotifyAuthStore.isGuest ? (
+            <Sidebar playlists={spotifyAuthStore.playlists} />
+          ) : (
+            <Sidebar playlists={spotifyAuthStore.albums} />
+          )}
+        </>
+        )}
       </div>
       <MainViewDiv>
         <p>Controls and downloads</p>

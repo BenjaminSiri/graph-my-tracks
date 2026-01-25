@@ -255,6 +255,53 @@ const Spotify = {
         }
     },
 
+    async getAlbums(): Promise<any> {
+        if (!SpotifyAuthStore.hasValidToken) {
+            return [];
+        }
+        
+        try {
+            let response;
+            
+            if (SpotifyAuthStore.isGuest) {
+                response = await fetch(
+                    `https://api.spotify.com/v1/browse/new-releases?limit=50`,
+                    {
+                        headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+                    }
+                );
+                
+                if (!response.ok) {
+                    console.error(`Failed to fetch new releases: ${response.status}`);
+                    return [];
+                }
+                
+                const jsonResponse = await response.json();
+                // Return albums directly, not wrapped in {album: ...}
+                return jsonResponse.albums.items || [];
+            } else {
+                response = await fetch(
+                    `https://api.spotify.com/v1/me/albums?limit=50`,
+                    {
+                        headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.error(`Failed to fetch albums: ${response.status}`);
+                    return [];
+                }
+
+                const jsonResponse = await response.json();
+                // Extract just the album objects from saved albums
+                return jsonResponse.items.map((item: any) => item.album) || [];
+            }
+        } catch (error) {
+            console.error('Error fetching albums:', error);
+            return [];
+        }
+    },
+
     // Logout
     logout(): void {
         SpotifyAuthStore.clearToken();
