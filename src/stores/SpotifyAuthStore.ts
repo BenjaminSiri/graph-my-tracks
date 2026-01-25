@@ -30,8 +30,21 @@ class SpotifyAuthStore {
   }
 
   setGuestMode(isGuest: boolean) {
-        this.isGuest = isGuest;
-    }
+      this.isGuest = isGuest;
+      localStorage.setItem('isGuest', JSON.stringify(isGuest));
+      
+      if (isGuest && !this.userInfo) {
+          this.setUserInfo({
+              display_name: 'Guest User',
+              id: 'guest',
+              email: '',
+              country: '',
+              images: [],
+              followers: { total: 0 },
+              external_urls: { spotify: '' }
+          });
+      }
+  }
 
   // Load token from localStorage on app initialization
   loadTokenFromStorage(): void {

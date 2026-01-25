@@ -48,36 +48,19 @@ const Navbar: React.FC = observer(() => {
             return;
         }
 
-        // Only fetch user info for authenticated users (not guests)
-        if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isLoading && !spotifyAuthStore.isGuest && !hasAttemptedFetch.current) {
-            hasAttemptedFetch.current = true; // Mark as attempted
-            Spotify.getUserInfo().catch((error) => {
-                console.error('Failed to fetch user info:', error);
-                // If getUserInfo fails, might be a guest token - set guest mode
-                spotifyAuthStore.setGuestMode(true);
-                spotifyAuthStore.setUserInfo({
-                    display_name: 'Guest User',
-                    id: 'guest',
-                    email: '',
-                    country: '',
-                    images: [],
-                    followers: { total: 0 },
-                    external_urls: { spotify: '' }
+        // Only fetch if we don't have user info yet
+        if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isGuest && !hasAttemptedFetch.current) {
+            hasAttemptedFetch.current = true;
+            Spotify.getUserInfo()
+                .then(userInfo => {
+                    spotifyAuthStore.setUserInfo(userInfo);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch user info:', error);
+                    spotifyAuthStore.setGuestMode(true); // This now sets guest info automatically
                 });
-            });
-        } else if (spotifyAuthStore.isGuest && !spotifyAuthStore.userInfo) {
-            // Set default guest user info
-            spotifyAuthStore.setUserInfo({
-                display_name: 'Guest User',
-                id: 'guest',
-                email: '',
-                country: '',
-                images: [],
-                followers: { total: 0 },
-                external_urls: { spotify: '' }
-            });
         }
-    }, [spotifyAuthStore.hasValidToken, spotifyAuthStore.userInfo, spotifyAuthStore.isLoading, spotifyAuthStore.isGuest, navigate, location.pathname]);
+    }, [spotifyAuthStore.hasValidToken, spotifyAuthStore.userInfo, spotifyAuthStore.isGuest, navigate, location.pathname]);
 
     const handleLogout = () => {
         Spotify.logout();
