@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useStores } from '../stores/RootStore';
 import Spotify from '../util/spotify';
 
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+
 const StyledNavbar = styled.div`
     width: 100%;
     display: flex;
@@ -82,11 +84,11 @@ const Navbar: React.FC = observer(() => {
                             alt="Profile" 
                         />
                     ) : (
-                        <p  style={{ color: '#1DB954' }}>No Profile Image</p>
+                        <AccountCircleOutlinedIcon style={{ fontSize: 50, color: '#1DB954' }} />
                     )}
                 </ProfileButton>
             ) : (
-                <p style={{ color: '#1DB954' }}>Loading user...</p>
+                <AccountCircleOutlinedIcon style={{ fontSize: 50, color: '#1DB954' }} />
             )}
         </StyledNavbar>
     );
