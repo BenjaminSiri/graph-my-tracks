@@ -36,7 +36,19 @@ export interface SpotifyTokenResponse {
     tracksTotal?: number;
     tracks?: any[];
   }
-  
+
+  export interface SpotifyAlbum {
+    id: string;
+    name: string;
+    images: Array<{
+      url: string;
+      height: number;
+      width: number;
+    }>;
+    tracksTotal: number;
+    tracks?: any[];
+  }
+
   export interface SpotifyError {
     error: string;
     error_description?: string;

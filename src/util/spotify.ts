@@ -1,5 +1,5 @@
 // spotify.ts
-import { SpotifyPlaylist } from '../types/spotify';
+import { SpotifyPlaylist, SpotifyAlbum } from '../types/spotify';
 import SpotifyAuthStore from '../stores/SpotifyAuthStore';
 
 const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID || '';
@@ -255,7 +255,7 @@ const Spotify = {
         }
     },
 
-    async getAlbums(): Promise<any> {
+    async getAlbums(): Promise<SpotifyAlbum[]> {
         if (!SpotifyAuthStore.hasValidToken) {
             return [];
         }
@@ -280,6 +280,32 @@ const Spotify = {
             return jsonResponse.albums.items || [];
         } catch (error) {
             console.error('Error fetching albums:', error);
+            return [];
+        }
+    },
+
+    async getAlbumTracks(albumId: string): Promise<any[]> {
+        if (!SpotifyAuthStore.hasValidToken) {
+            return [];
+        }
+
+        try {
+            const response = await fetch(
+                `https://api.spotify.com/v1/albums/${albumId}/tracks`,
+                {
+                    headers: { Authorization: `Bearer ${SpotifyAuthStore.accessToken}` }
+                }
+            );
+
+            if (!response.ok) {
+                console.error(`Failed to fetch album tracks: ${response.status}`);
+                return [];
+            }
+
+            const jsonResponse = await response.json();
+            return jsonResponse.items || [];
+        } catch (error) {
+            console.error('Error fetching album tracks:', error);
             return [];
         }
     },

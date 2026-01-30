@@ -1,13 +1,13 @@
 // stores/SpotifyAuthStore.ts
 import { makeAutoObservable } from 'mobx';
-import { SpotifyUserInfo, SpotifyPlaylist } from '../types/spotify';
+import { SpotifyUserInfo, SpotifyPlaylist, SpotifyAlbum } from '../types/spotify';
 
 class SpotifyAuthStore {
   accessToken: string = '';
   tokenExpirationTime: number = 0;
   userInfo: SpotifyUserInfo | null = null;
   playlists: SpotifyPlaylist[] = [];
-  albums: any[] = [];
+  albums: SpotifyAlbum[] = [];
   isLoading: boolean = false;
   selectedPlaylistId: string | null = null;
   error: string | null = null;
@@ -118,7 +118,7 @@ class SpotifyAuthStore {
     this.selectedPlaylistId = playlistId;
   }
 
-  setAlbums(albums: any[]): void {
+  setAlbums(albums: SpotifyAlbum[]): void {
     this.albums = albums;
   }
 
