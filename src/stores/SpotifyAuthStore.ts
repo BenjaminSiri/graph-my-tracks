@@ -16,6 +16,7 @@ class SpotifyAuthStore {
   constructor() {
     makeAutoObservable(this);
     this.loadTokenFromStorage();
+    this.loadGuestModeFromStorage(); // Add this
   }
 
   // Save token and expiration
@@ -31,20 +32,42 @@ class SpotifyAuthStore {
   }
 
   setGuestMode(isGuest: boolean) {
-      this.isGuest = isGuest;
-      localStorage.setItem('isGuest', JSON.stringify(isGuest));
+    this.isGuest = isGuest;
+    localStorage.setItem('isGuest', JSON.stringify(isGuest));
+    
+    if (isGuest && !this.userInfo) {
+      this.setUserInfo({
+        display_name: 'Guest User',
+        id: 'guest',
+        email: '',
+        country: '',
+        images: [],
+        followers: { total: 0 },
+        external_urls: { spotify: '' }
+      });
+    }
+  }
+
+  // Load guest mode from localStorage
+  loadGuestModeFromStorage(): void {
+    const savedGuestMode = localStorage.getItem('isGuest');
+    
+    if (savedGuestMode) {
+      this.isGuest = JSON.parse(savedGuestMode);
       
-      if (isGuest && !this.userInfo) {
-          this.setUserInfo({
-              display_name: 'Guest User',
-              id: 'guest',
-              email: '',
-              country: '',
-              images: [],
-              followers: { total: 0 },
-              external_urls: { spotify: '' }
-          });
+      // Set guest user info immediately if in guest mode
+      if (this.isGuest && !this.userInfo) {
+        this.userInfo = {
+          display_name: 'Guest User',
+          id: 'guest',
+          email: '',
+          country: '',
+          images: [],
+          followers: { total: 0 },
+          external_urls: { spotify: '' }
+        };
       }
+    }
   }
 
   // Load token from localStorage on app initialization
@@ -116,11 +139,14 @@ class SpotifyAuthStore {
     this.tokenExpirationTime = 0;
     this.userInfo = null;
     this.playlists = [];
+    this.albums = [];
     this.error = null;
+    this.isGuest = false;
     
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_token_expiration');
     localStorage.removeItem('verifier');
+    localStorage.removeItem('isGuest'); // Add this
   }
 
   // Check if user is authenticated

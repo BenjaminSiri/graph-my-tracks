@@ -1,5 +1,6 @@
 // components/Login.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Divider } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/RootStore';
@@ -77,6 +78,7 @@ const StyledText = styled.p`
 
 const Login: React.FC = observer(() => {
   const { spotifyAuthStore } = useStores();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -89,8 +91,8 @@ const Login: React.FC = observer(() => {
 const handleGuestLogin = async () => {
     try {
         await Spotify.getGuestAccessToken();
-        spotifyAuthStore.setGuestMode(true); // Add this
-        window.location.href = '/dashboard';
+        spotifyAuthStore.setGuestMode(true);
+        navigate('/dashboard'); // Use navigate instead of window.location.href
     } catch (error) {
         console.error('Failed to get guest access token:', error);
     }

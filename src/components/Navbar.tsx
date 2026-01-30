@@ -48,18 +48,22 @@ const Navbar: React.FC = observer(() => {
             return;
         }
 
-        // Only fetch if we don't have user info yet
-        if (!spotifyAuthStore.userInfo && !spotifyAuthStore.isGuest && !hasAttemptedFetch.current) {
-            hasAttemptedFetch.current = true;
-            Spotify.getUserInfo()
-                .then(userInfo => {
-                    spotifyAuthStore.setUserInfo(userInfo);
-                })
-                .catch(error => {
-                    console.error('Failed to fetch user info:', error);
-                    spotifyAuthStore.setGuestMode(true); // This now sets guest info automatically
-                });
+        // Skip if guest or already have user info or already attempted
+        if (spotifyAuthStore.isGuest || spotifyAuthStore.userInfo || hasAttemptedFetch.current) {
+            return;
         }
+
+        // Only authenticated users need to fetch user info
+        hasAttemptedFetch.current = true;
+        Spotify.getUserInfo()
+            .then(userInfo => {
+                spotifyAuthStore.setUserInfo(userInfo);
+            })
+            .catch(error => {
+                console.error('Failed to fetch user info:', error);
+                // If fetch fails, treat as guest
+                spotifyAuthStore.setGuestMode(true);
+            });
     }, [spotifyAuthStore.hasValidToken, spotifyAuthStore.userInfo, spotifyAuthStore.isGuest, navigate, location.pathname]);
 
     const handleLogout = () => {
