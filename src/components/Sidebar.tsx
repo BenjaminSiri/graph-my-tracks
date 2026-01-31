@@ -81,11 +81,23 @@ const Sidebar: React.FC<SidebarProps> = observer((props) => {
         spotifyAuthStore.setSelectedPlaylist(playlistId);
     }
 
+    const handleAlbumClick = (albumId: string) => {
+        spotifyAuthStore.setSelectedAlbum(albumId);
+    }
+
+    const handleClick = (id: string) => {
+        if (spotifyAuthStore.displayType === 'playlists') {
+            handlePlaylistClick(id);
+        } else if (spotifyAuthStore.displayType === 'albums') {
+            handleAlbumClick(id);
+        }
+    }
+
     return(
         <StyledStack>
             {props.playlists.map((playlist) => (
                 <StyledCard key={playlist.id}>
-                    <CardActionArea onClick={() => handlePlaylistClick(playlist.id)}>
+                    <CardActionArea onClick={() => handleClick(playlist.id)}>
                         <StyledCardContent>
                             {playlist.images && playlist.images.length > 0 && playlist.images[0]?.url ? (
                                 <PlaylistImage 

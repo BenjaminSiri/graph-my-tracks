@@ -61,7 +61,7 @@ const Dashboard: React.FC = observer(() => {
           setIsLoading(false);
         }
       };
-
+      spotifyAuthStore.setDisplayType('playlists');
       fetchPlaylists();
     } else {
       const fetchAlbums = async () => {
@@ -75,6 +75,7 @@ const Dashboard: React.FC = observer(() => {
           setIsLoading(false);
         }
       };
+      spotifyAuthStore.setDisplayType('albums');
       fetchAlbums();
     }
   }, [spotifyAuthStore.userInfo, spotifyAuthStore]);

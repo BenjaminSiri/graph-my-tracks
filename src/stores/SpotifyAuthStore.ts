@@ -10,8 +10,10 @@ class SpotifyAuthStore {
   albums: SpotifyAlbum[] = [];
   isLoading: boolean = false;
   selectedPlaylistId: string | null = null;
+  selectedAlbumId: string | null = null;
   error: string | null = null;
   isGuest: boolean = false;
+  displayType: 'playlists' | 'albums' | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -118,8 +120,23 @@ class SpotifyAuthStore {
     this.selectedPlaylistId = playlistId;
   }
 
+  // Set selected album
+  setSelectedAlbum(albumId: string | null): void {
+    this.selectedAlbumId = albumId;
+  }
+
   setAlbums(albums: SpotifyAlbum[]): void {
     this.albums = albums;
+  }
+
+  setDisplayType(type: 'playlists' | 'albums' | null): void {
+    this.displayType = type;
+  }
+
+  // Get selected album
+  get selectedAlbum(): SpotifyAlbum | null {
+    if (!this.selectedAlbumId) return null;
+    return this.albums.find(a => a.id === this.selectedAlbumId) || null;
   }
 
   // Get selected playlist

@@ -40,14 +40,25 @@ const Graph: React.FC = observer(() => {
     const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
 
     useEffect(() => {
-        if (!spotifyAuthStore.selectedPlaylist) {
+
+        if (!spotifyAuthStore.selectedPlaylist && !spotifyAuthStore.selectedAlbum) {
             setTracks([]);
             return;
         }
-        Spotify.getPlaylistTracks(spotifyAuthStore.selectedPlaylist?.id).then((tracks) => {
-            setTracks(tracks);
-        });
-    }, [spotifyAuthStore.selectedPlaylist]);
+        if (spotifyAuthStore.displayType === 'albums' && spotifyAuthStore.selectedAlbum) {
+            Spotify.getAlbumTracks(spotifyAuthStore.selectedAlbum?.id).then((tracks) => {
+                setTracks(tracks);
+            });
+            return;
+        }
+        if (spotifyAuthStore.displayType === 'playlists' && spotifyAuthStore.selectedPlaylist) {
+            Spotify.getPlaylistTracks(spotifyAuthStore.selectedPlaylist?.id).then((tracks) => {
+                setTracks(tracks);
+            });
+            return;
+        }
+
+    }, [spotifyAuthStore.selectedPlaylist, spotifyAuthStore.selectedAlbum]);
 
     const chartData = {
         labels: tracks.map((trackItem, index) => `Track ${index + 1}`),
