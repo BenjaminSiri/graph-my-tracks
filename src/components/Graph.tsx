@@ -106,7 +106,6 @@ const Graph: React.FC = observer(() => {
 
     return (
         <StyledDiv>
-            <p>{spotifyAuthStore.selectedPlaylist ? spotifyAuthStore.selectedPlaylist.name : 'Select a playlist'}</p>
             
             {tracks.length > 0 && (
                 <div style={{ width: '100%', marginBottom: '20px' }}>

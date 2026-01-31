@@ -53,6 +53,7 @@ export interface SpotifyTokenResponse {
     id: string;
     name: string;
     duration_ms: number;
+    explicit: boolean;
   }
 
   export interface SpotifyError {

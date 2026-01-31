@@ -251,7 +251,8 @@ const Spotify = {
             return (jsonResponse.tracks.items || []).map((item: any) => ({
                 id: item.track.id,
                 name: item.track.name,
-                duration_ms: item.track.duration_ms
+                duration_ms: item.track.duration_ms,
+                explicit: item.track.explicit
             }));
         } catch (error) {
             console.error('Error fetching playlist tracks:', error);
@@ -310,7 +311,8 @@ const Spotify = {
             return (jsonResponse.items || []).map((track: any) => ({
                 id: track.id,
                 name: track.name,
-                duration_ms: track.duration_ms
+                duration_ms: track.duration_ms,
+                explicit: track.explicit
             }));
         } catch (error) {
             console.error('Error fetching album tracks:', error);
