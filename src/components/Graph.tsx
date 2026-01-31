@@ -29,7 +29,6 @@ ChartJS.register(
 );
 
 const StyledDiv = styled.div`
-    border: 1px solid #ccc;
     width: 100%;
     height: calc(100% - 60px);
     padding: 20px;

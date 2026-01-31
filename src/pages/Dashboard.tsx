@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 import Graph from '../components/Graph';
 import Sidebar from '../components/Sidebar';
+import Controls from '../components/Controls';
 
 const DashboardDiv = styled.div`
   display: flex;
@@ -104,7 +105,7 @@ const Dashboard: React.FC = observer(() => {
         )}
       </div>
       <MainViewDiv>
-        <p>Controls and downloads</p>
+        <Controls />
         <Graph />
       </MainViewDiv>
     </DashboardDiv>
