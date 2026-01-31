@@ -36,12 +36,50 @@ const StyledDiv = styled.div`
 
 const Graph: React.FC = observer(() => {
     const { spotifyAuthStore } = useStores();
-    const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
+    const [tracks, setTracks] = useState<SpotifyTrack[]>([ 
+                {
+                    id: '1',
+                    name: 'Track 1',
+                    duration_ms: 200000,
+                    explicit: false,
+                },
+                {
+                    id: '2',
+                    name: 'Track 2',
+                    duration_ms: 180000,
+                    explicit: false,
+                },
+                {
+                    id: '3',
+                    name: 'Track 3',
+                    duration_ms: 240000,
+                    explicit: false,
+                },
+        ]);
 
     useEffect(() => {
 
         if (!spotifyAuthStore.selectedPlaylist && !spotifyAuthStore.selectedAlbum) {
-            setTracks([]);
+            setTracks([
+                {
+                    id: '1',
+                    name: 'Track 1',
+                    duration_ms: 200000,
+                    explicit: false,
+                },
+                {
+                    id: '2',
+                    name: 'Track 2',
+                    duration_ms: 180000,
+                    explicit: false,
+                },
+                {
+                    id: '3',
+                    name: 'Track 3',
+                    duration_ms: 240000,
+                    explicit: false,
+                },
+            ]);
             return;
         }
         if (spotifyAuthStore.displayType === 'albums' && spotifyAuthStore.selectedAlbum) {
