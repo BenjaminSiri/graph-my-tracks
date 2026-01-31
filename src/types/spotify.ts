@@ -49,6 +49,12 @@ export interface SpotifyTokenResponse {
     tracks?: any[];
   }
 
+  export interface SpotifyTrack {
+    id: string;
+    name: string;
+    duration_ms: number;
+  }
+
   export interface SpotifyError {
     error: string;
     error_description?: string;

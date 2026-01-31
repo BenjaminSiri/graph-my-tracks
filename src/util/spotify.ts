@@ -1,5 +1,5 @@
 // spotify.ts
-import { SpotifyPlaylist, SpotifyAlbum } from '../types/spotify';
+import { SpotifyPlaylist, SpotifyAlbum, SpotifyTrack } from '../types/spotify';
 import SpotifyAuthStore from '../stores/SpotifyAuthStore';
 
 const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID || '';
@@ -229,7 +229,7 @@ const Spotify = {
         }
     },
 
-    async getPlaylistTracks(playlistId: string): Promise<any[]> {
+    async getPlaylistTracks(playlistId: string): Promise<SpotifyTrack[]> {
         if (!SpotifyAuthStore.hasValidToken) {
             return [];
         }
@@ -248,7 +248,11 @@ const Spotify = {
             }
 
             const jsonResponse = await response.json();
-            return jsonResponse.tracks.items || [];
+            return (jsonResponse.tracks.items || []).map((item: any) => ({
+                id: item.track.id,
+                name: item.track.name,
+                duration_ms: item.track.duration_ms
+            }));
         } catch (error) {
             console.error('Error fetching playlist tracks:', error);
             return [];
@@ -284,7 +288,7 @@ const Spotify = {
         }
     },
 
-    async getAlbumTracks(albumId: string): Promise<any[]> {
+    async getAlbumTracks(albumId: string): Promise<SpotifyTrack[]> {
         if (!SpotifyAuthStore.hasValidToken) {
             return [];
         }
@@ -303,7 +307,11 @@ const Spotify = {
             }
 
             const jsonResponse = await response.json();
-            return jsonResponse.items || [];
+            return (jsonResponse.items || []).map((track: any) => ({
+                id: track.id,
+                name: track.name,
+                duration_ms: track.duration_ms
+            }));
         } catch (error) {
             console.error('Error fetching album tracks:', error);
             return [];

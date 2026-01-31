@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/RootStore';
 import Spotify from '../util/spotify';
+import { SpotifyTrack } from '../types/spotify';
 
 import { Line } from 'react-chartjs-2';
 import {
@@ -36,7 +37,7 @@ const StyledDiv = styled.div`
 
 const Graph: React.FC = observer(() => {
     const { spotifyAuthStore } = useStores();
-    const [tracks, setTracks] = useState<any[]>([]);
+    const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
 
     useEffect(() => {
         if (!spotifyAuthStore.selectedPlaylist) {
@@ -50,10 +51,9 @@ const Graph: React.FC = observer(() => {
 
     const chartData = {
         labels: tracks.map((trackItem, index) => `Track ${index + 1}`),
-        datasets: [
-          {
+        datasets: [{
             label: 'Track Duration (seconds)',
-            data: tracks.map(trackItem => trackItem.track.duration_ms / 1000),
+            data: tracks.map(trackItem => trackItem.duration_ms / 1000),
             borderColor: '#1DB954',
             backgroundColor: 'rgba(29, 185, 84, 0.1)',
             tension: 0.4,
@@ -80,7 +80,7 @@ const Graph: React.FC = observer(() => {
                 callbacks: {
                     title: (context: any) => {
                         const index = context[0].dataIndex;
-                        return tracks[index]?.track.name || 'Unknown Track';
+                        return tracks[index]?.name || 'Unknown Track';
                     },
                     label: (context: any) => {
                         const seconds = context.parsed.y;
